@@ -13,7 +13,7 @@ fn main() {
     let path: String = env::args().nth(1).unwrap();
     match phash(&path) {
         Ok(hash) => {
-            println!("{}", hash.to_base64());
+            println!("{:?}", hash.bitv.to_bytes());
         }
         Err(e) => {
             error!("Error: {}! Filepath: {}", e, path);
@@ -29,6 +29,6 @@ fn phash(path: &String) -> Result<ImageHash, String> {
     try!(file.read_to_end(&mut buffer).map_err(|e| e.to_string()));
     let image = try!(image::load_from_memory(&buffer).map_err(|e| e.to_string()));
 
-    let hash = ImageHash::hash(&image, 8, HashType::Gradient);
+    let hash = ImageHash::hash(&image, 64, HashType::Gradient);
     Ok(hash)
 }
