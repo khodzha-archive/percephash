@@ -1,34 +1,28 @@
 extern crate image;
 extern crate img_hash;
+extern crate serde;
 #[macro_use]
-extern crate log;
+extern crate serde_json;
 
 use std::env;
 use std::fs::File;
 use std::io::Read;
+use std::collections::HashMap;
 
 use img_hash::{ImageHash, HashType};
 
+const HASH_SIZE: u32 = 32;
+
 fn main() {
     let path: String = env::args().nth(1).unwrap();
-    match phash(&path) {
-        Ok(hash) => {
-            println!("{:?}", hash.bitv.to_bytes());
-        }
-        Err(e) => {
-            error!("Error: {}! Filepath: {}", e, path);
-        }
-    }
-
-}
-
-fn phash(path: &String) -> Result<ImageHash, String> {
-
-    let mut file = try!(File::open(path).map_err(|e| e.to_string()));
+    let mut file = File::open(path).unwrap();
     let mut buffer: Vec<u8> = Vec::new();
-    try!(file.read_to_end(&mut buffer).map_err(|e| e.to_string()));
-    let image = try!(image::load_from_memory(&buffer).map_err(|e| e.to_string()));
+    file.read_to_end(&mut buffer);
+    let image = image::load_from_memory(&buffer).unwrap();
 
-    let hash = ImageHash::hash(&image, 64, HashType::Gradient);
-    Ok(hash)
+    let mut hashes = HashMap::new();
+    hashes.insert("mean", ImageHash::hash(&image, HASH_SIZE, HashType::Mean).bitv.to_bytes());
+    hashes.insert("gradient", ImageHash::hash(&image, HASH_SIZE, HashType::DoubleGradient).bitv.to_bytes());
+    hashes.insert("dct", ImageHash::hash(&image, HASH_SIZE, HashType::DCT).bitv.to_bytes());
+    println!("{}", json!(hashes));
 }
