@@ -8,6 +8,8 @@ image = "0.13.0"
 serde = "1.0.8"
 serde_json = "1.0"
 rust-crypto = "0.2.36"
+hyper = "0.10.13"
+multipart = "0.13.3"
 
 [dependencies.img_hash]
 version = "2.0"
